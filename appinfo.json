@@ -1,0 +1,67 @@
+{
+    "appKeys": {
+        "KEY_ALTIMETER": 7,
+        "KEY_CLOUDS": 10,
+        "KEY_CONDITION": 1,
+        "KEY_DEWPOINT": 6,
+        "KEY_ISSUE_TIME": 2,
+        "KEY_OTHER_WX": 9,
+        "KEY_STATION": 0,
+        "KEY_TEMPERATURE": 5,
+        "KEY_VISIBILITY": 8,
+        "KEY_WIND_DIRECTION": 3,
+        "KEY_WIND_SPEED": 4
+    },
+    "capabilities": [
+        "configurable"
+    ],
+    "companyName": "Michael duPont",
+    "longName": "METAR Watchface",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/Background.png",
+                "name": "BACKGROUND",
+                "type": "png"
+            },
+            {
+                "file": "images/AppIcon.png",
+                "menuIcon": true,
+                "name": "APP_ICON",
+                "type": "png"
+            },
+            {
+                "characterRegex": "[A-Z0-9:. ]",
+                "file": "fonts/Roboto-Medium.ttf",
+                "name": "ROBOTO_MEDIUM_22",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[A-Z0-9]",
+                "file": "fonts/Cousine-Bold.ttf",
+                "name": "COUSINE_BOLD_20",
+                "type": "font"
+            },
+            {
+                "characterRegex": "[0-9: ]",
+                "file": "fonts/OpenSans-CondLight.ttf",
+                "name": "OPEN_SANS_CONDENSED_LIGHT_50",
+                "type": "font"
+            },
+            {
+                "file": "fonts/OpenSans-CondLight.ttf",
+                "name": "OPEN_SANS_CONDENSED_LIGHT_22",
+                "type": "font"
+            }
+        ]
+    },
+    "sdkVersion": "2",
+    "shortName": "METAR Watch",
+    "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": true
+    }
+}
