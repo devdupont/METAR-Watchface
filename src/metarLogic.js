@@ -1,4 +1,5 @@
 var stationID = localStorage.getItem("stationID");
+if ((stationID === null)||(stationID.length != 4)) { stationID = "KJFK"; }
 var altimeter = "";
 var temperature = "";
 var dewpoint = "";
@@ -12,13 +13,13 @@ var flightCondition = "";
 var allCloudsList = [];
 var cloudCodeList = ["CLR","SKC","FEW","SCT","BKN","OVC"];
 
-function printList(someList) {
+/*function printList(someList) {
   var ret = "";
   for (var i=0; i<someList.length; i++) {
     ret += someList[i] + "";
   }
   return ret;
-}
+}*/
 
 var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -120,7 +121,13 @@ function parseVisibility(rawList) {
       vis1 = vis1 + vis2;
       visibility = vis1.toString();
     }
-    if (visibility.length > 3) { visibility = visibility.substring(0,3); }
+    if (visibility.length > 3) {
+      if (visibility[0] == "0") {
+        visibility = visibility.substring(1,4);
+      } else {
+        visibility = visibility.substring(0,3);
+      }
+    }
     //console.log("Visibility = " + visibility);
   }
   return rawList;
@@ -140,10 +147,22 @@ function parseClouds(rawList) {
       }
     }
     if (cloudList.length == 1) { clouds = cloudList[0]; }
-    else if (cloudList.length >= 2) { clouds = cloudList[1] + " " + cloudList[0]; }
+    else if (cloudList.length >= 2) { clouds = cloudList[cloudList.length-1] + " " + cloudList[cloudList.length-2]; }
     //console.log("Clouds = " + clouds);
     //console.log("cloudList = " + printList(cloudList));
     allCloudsList = cloudList;
+  }
+  return rawList;
+}
+
+function removeRunwayVis(rawList) {
+  if (rawList.length != 0) {
+    for (var i=rawList.length-1; i>-1; i--) {
+      if ((rawList[i][0] == "R") && (rawList[i].indexOf("/") != -1)) {
+        //console.log(rawList[i]);
+        rawList.splice(i,1);
+      }
+    }
   }
   return rawList;
 }
@@ -161,6 +180,7 @@ function parseMETAR(raw) {
   rawList = parseWinds(rawList);
   rawList = parseVisibility(rawList);
   rawList = parseClouds(rawList);
+  rawList = removeRunwayVis(rawList);
   otherWX = rawList.join(" ");
   //console.log("Other WX = " + otherWX);
 }
@@ -224,7 +244,6 @@ function updateMETAR() {
       console.log(metar);
       parseMETAR(metar);
       getFlightRules();
-      //console.log("FlightCondition = " + flightCondition);
       valueReplacements();
       
       var dictionary = {

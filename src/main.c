@@ -14,6 +14,8 @@
 #define KEY_OTHER_WX 9
 #define KEY_CLOUDS 10
 
+#define UPDATE_INTERVAL 15 //minutes
+
 //---------------------------------Pointer Declarations---------------------------------//
 static Window *s_main_window;
 //TextLayers
@@ -37,6 +39,8 @@ static GFont *s_row_condensed_font;
 //Background
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
+
+int i;
 
 //--------------------------------Pebble UI Loading Functions--------------------------------//
 
@@ -231,83 +235,85 @@ static void update_time() {
   text_layer_set_text(s_header_time_layer, buffer);
 }
 
+static void auto_update_handler() {
+  //Call for updated data if reached UPDATE_INTERVAL
+  if (i > UPDATE_INTERVAL) {
+    i = 0;
+    app_message_outbox_send(); //Sending empty outbox requests new updated inbox
+  } else {
+    i++;
+  }
+}
+
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_time();
+  auto_update_handler();
 }
 
 static void update_station(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Station");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_header_station_layer, buffer);
+  layer_mark_dirty(text_layer_get_layer(s_header_station_layer));
 }
 
 static void update_condition(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Condition");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_header_condition_layer, buffer);
 }
 
 static void update_issue_time(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Issue Time");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row1_issue_time_layer, buffer);
+  layer_mark_dirty(text_layer_get_layer(s_row1_issue_time_layer));
 }
 
 static void update_wind_direction(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Wind Direction");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row2_wind_direction_layer, buffer);
 }
 
 static void update_wind_speed(Tuple *t) {
   static char buffer[16];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Wind Speed");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row2_wind_speed_layer, buffer);
 }
 
 static void update_temperature(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Temperature");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row3_temperature_layer, buffer);
 }
 
 static void update_dewpoint(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Dewpoint");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row3_dewpoint_layer, buffer);
 }
 
 static void update_altimeter(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Altimeter");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row3_altimeter_layer, buffer);
 }
 
 static void update_visibility(Tuple *t) {
   static char buffer[8];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Altimeter");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row4_visibility_layer, buffer);
 }
 
 static void update_other_wx(Tuple *t) {
   static char buffer[32];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Other WX");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row4_other_wx_layer, buffer);
 }
 
 static void update_clouds(Tuple *t) {
   static char buffer[32];
-  //APP_LOG(APP_LOG_LEVEL_INFO, "Updating Clouds");
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row5_cloud_layer, buffer);
 }
@@ -382,6 +388,8 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 //-----------------------------------Init Deinit and Main-----------------------------------//
 
 static void init() {
+  i = 0;
+  
   // Create main Window element and assign to pointer
   s_main_window = window_create();
 
