@@ -13,13 +13,13 @@ var flightCondition = "";
 var allCloudsList = [];
 var cloudCodeList = ["CLR","SKC","FEW","SCT","BKN","OVC"];
 
-/*function printList(someList) {
+function printList(someList) {
   var ret = "";
   for (var i=0; i<someList.length; i++) {
     ret += someList[i] + "";
   }
   return ret;
-}*/
+}
 
 var xhrRequest = function (url, type, callback) {
   var xhr = new XMLHttpRequest();
@@ -51,7 +51,7 @@ function parseAltimeter(rawList) {
     if (rawList[rawList.length-1][0] == "A") {
       altimeter = rawList.pop().substring(1);
       altimeter = altimeter.substring(0,2) + "." + altimeter.substring(2);
-      //console.log("Altimeter = " + altimeter);
+      console.log("Altimeter = " + altimeter);
     }
   }
   return rawList;
@@ -63,11 +63,11 @@ function parseTempAndDew(rawList) {
   if (rawList.length != 0) {
     var slashIndex = rawList[rawList.length-1].indexOf("/");
     if (slashIndex != -1) {
-      var tempAndDew = rawList.pop();
-      temperature = tempAndDew.substring(0,slashIndex).replace("M","-");
-      dewpoint = tempAndDew.substring(slashIndex+1).replace("M","-");
-      //console.log("Temperature = " + temperature);
-      //console.log("Dewpoint = " + dewpoint);
+      var tempAndDew = rawList.pop().split('/');
+      temperature = tempAndDew[0].replace("M","-");
+      dewpoint = tempAndDew[1].replace("M","-");
+      console.log("Temperature = " + temperature);
+      console.log("Dewpoint = " + dewpoint);
     }
   }
   return rawList;
@@ -79,7 +79,7 @@ function parseTime(rawList) {
     if (rawList[0][rawList[0].length-1] == "Z") {
       time = rawList.shift().substring(2);
       time = time.substring(0,2) + ":" + time.substring(2);
-      //console.log("Time = " + time);
+      console.log("Time = " + time);
     }
   }
   return rawList;
@@ -90,7 +90,7 @@ function parseWinds(rawList) {
   windSpeed = "..KT";
   if (rawList.length != 0) {
     var wind = rawList[0];
-    if ((wind.substring(wind.length-2) == "KT") || ((wind.length > 7) && (wind.indexOf("G") != -1))) {
+    if ((wind.substring(wind.length-2) == "KT") || (wind.substring(wind.length-3) == "KTS") || ((wind.length > 7) && (wind.indexOf("G") != -1))) {
       wind = rawList.shift();
       windDirection = wind.substring(0,3) + "\xB0";
       windSpeed = wind.substring(3);
@@ -101,8 +101,13 @@ function parseWinds(rawList) {
       } else {
         
       }*/
-      //console.log("Wind Direction = " + windDirection);
-      //console.log("Wind Speed = " + windSpeed);
+      console.log("Wind Direction = " + windDirection);
+      console.log("Wind Speed = " + windSpeed);
+    }
+  }
+  if (rawList.length != 0) {
+    if ((rawList[0].length == 7) && (rawList[0][3] == "V") && (!isNaN(rawList[0].substring(0,3))) && (!isNaN(rawList[0].substring(4)))) {
+      rawList.shift();
     }
   }
   return rawList;
@@ -114,6 +119,9 @@ function parseVisibility(rawList) {
     if (rawList[0].indexOf("SM") != -1) {
       var vis = rawList.shift();
       visibility = eval(vis.substring(0, vis.length - 2)).toString();
+    } else if (rawList[0] == "9999") {
+      visibility = "10";
+      rawList.shift();
     } else if ((rawList.length > 1) && (rawList[1].indexOf("SM") != -1)) {
       var vis1 = eval(rawList.shift());
       var vis2 = rawList.shift();
@@ -128,7 +136,7 @@ function parseVisibility(rawList) {
         visibility = visibility.substring(0,3);
       }
     }
-    //console.log("Visibility = " + visibility);
+    console.log("Visibility = " + visibility);
   }
   return rawList;
 }
@@ -138,18 +146,18 @@ function parseClouds(rawList) {
   var cloudList = [];
   if (rawList.length != 0) {
     for (var i=rawList.length-1; i>-1; i--) {
-      if ((rawList[i].length == 6) && (cloudCodeList.indexOf(rawList[i].substring(0,3)) != -1)) {
-        cloudList.push(rawList[i]);
+      if (cloudCodeList.indexOf(rawList[i].substring(0,3)) != -1) {
+        cloudList.push(rawList[i].substring(0,6));
         rawList.splice(i,1);
       } else if ((rawList[i].length == 5) && (rawList[i].substring(0, 2) == "VV")) {
-        cloudList.push(rawList[i]);
+        cloudList.push(rawList[i].substring(0,5));
         rawList.splice(i,1);
       }
     }
     if (cloudList.length == 1) { clouds = cloudList[0]; }
     else if (cloudList.length >= 2) { clouds = cloudList[cloudList.length-1] + " " + cloudList[cloudList.length-2]; }
-    //console.log("Clouds = " + clouds);
-    //console.log("cloudList = " + printList(cloudList));
+    console.log("Clouds = " + clouds);
+    console.log("cloudList = " + printList(cloudList));
     allCloudsList = cloudList;
   }
   return rawList;
@@ -159,7 +167,7 @@ function removeRunwayVis(rawList) {
   if (rawList.length != 0) {
     for (var i=rawList.length-1; i>-1; i--) {
       if ((rawList[i][0] == "R") && (rawList[i].indexOf("/") != -1)) {
-        //console.log(rawList[i]);
+        console.log(rawList[i]);
         rawList.splice(i,1);
       }
     }
@@ -182,7 +190,7 @@ function parseMETAR(raw) {
   rawList = parseClouds(rawList);
   rawList = removeRunwayVis(rawList);
   otherWX = rawList.join(" ");
-  //console.log("Other WX = " + otherWX);
+  console.log("Other WX = " + otherWX);
 }
 
 function getCeiling(cloudList) {
@@ -190,7 +198,7 @@ function getCeiling(cloudList) {
     if (cloudList[i].indexOf("/") == -1) {
       //console.log("Now Checking: " + cloudList[i]);
       if ((cloudList[i].substring(0,3) == "OVC") || (cloudList[i].substring(0,3) == "BKN") || (cloudList[i].substring(0,2) == "VV")) {
-        //console.log("Now returning: " + cloudList[i]);
+        console.log("Now returning: " + cloudList[i]);
         return cloudList[i];
       }
     }
@@ -244,6 +252,7 @@ function updateMETAR() {
       console.log(metar);
       parseMETAR(metar);
       getFlightRules();
+      console.log("Flight Rules = " + flightCondition);
       valueReplacements();
       
       var dictionary = {
