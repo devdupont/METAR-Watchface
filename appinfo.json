@@ -1,16 +1,17 @@
 {
     "appKeys": {
-        "KEY_ALTIMETER": 7,
-        "KEY_CLOUDS": 10,
+        "KEY_ALTIMETER": 8,
+        "KEY_CLOUDS": 11,
         "KEY_CONDITION": 1,
-        "KEY_DEWPOINT": 6,
+        "KEY_DEWPOINT": 7,
         "KEY_ISSUE_TIME": 2,
-        "KEY_OTHER_WX": 9,
+        "KEY_OTHER_WX": 10,
+        "KEY_PARSER_TYPE": 3,
         "KEY_STATION": 0,
-        "KEY_TEMPERATURE": 5,
-        "KEY_VISIBILITY": 8,
-        "KEY_WIND_DIRECTION": 3,
-        "KEY_WIND_SPEED": 4
+        "KEY_TEMPERATURE": 6,
+        "KEY_VISIBILITY": 9,
+        "KEY_WIND_DIRECTION": 4,
+        "KEY_WIND_SPEED": 5
     },
     "capabilities": [
         "configurable"
@@ -32,7 +33,7 @@
                 "type": "png"
             },
             {
-                "characterRegex": "[A-Z0-9:. ]",
+                "characterRegex": "[A-Z0-9:.( ]",
                 "file": "fonts/Roboto-Medium.ttf",
                 "name": "ROBOTO_MEDIUM_22",
                 "type": "font"
@@ -60,7 +61,7 @@
     "shortName": "METAR Watch",
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
     "versionCode": 1,
-    "versionLabel": "1.3",
+    "versionLabel": "2.0",
     "watchapp": {
         "watchface": true
     }
