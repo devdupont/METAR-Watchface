@@ -1,3 +1,12 @@
+//--------GeoLocation Var
+var getNearest = localStorage.getItem('getNearest');
+if (getNearest === 'true') {
+  getNearest = true;
+} else {
+  getNearest = false;
+}
+//getNearest = true;
+
 //--------Declare vars to be returned to the Pebble
 var stationID = localStorage.getItem('stationID');
 if ((stationID === null)||(stationID.length != 4)) { stationID = 'KJFK'; }
@@ -46,6 +55,15 @@ var xhrRequest = function (url, type, callback) {
   xhr.open(type, url);
   xhr.send();
 };
+
+function parseXML(xml) {
+  var json = JSON.parse(xml);
+  console.log(JSON.stringify(json));
+  //console.log(json.weatherObservation.ICAO);
+  stationID = json.weatherObservation.ICAO;
+  //console.log(json.weatherObservation.observation);
+  return json.weatherObservation.observation;
+}
 
 function parseHTML(html) {
   var rawMETAR = '';
@@ -253,11 +271,11 @@ function splitCloud(cloud, beginsWithVV) {
     newSplitCloud.push(cloud.substring(0,2));
     cloud = cloud.substring(2);
   }
-  while (cloud.length > 3) {
+  while (cloud.length >= 3) {
     newSplitCloud.push(cloud.substring(0,3));
     cloud = cloud.substring(3);
   }
-  newSplitCloud.push(cloud);
+  if (cloud.length !== 0) { newSplitCloud.push(cloud); }
   return newSplitCloud;
 }
 
@@ -353,7 +371,7 @@ function getFlightRules(vis , splitCloud) {
     vis = parseInt(vis);
   }
   var cld = 99;
-  if (splitCloud) {
+  if ((splitCloud) && (splitCloud.length > 1)) {
     cld = parseInt(splitCloud[1]);
   }
   console.log("Getting rules with '" + vis.toString() + "' and '" + cld.toString() + "'");
@@ -406,7 +424,11 @@ function prepareDataForPebble() {
     }
   }
   //Clouds
-  for (i=0; ((i<2) && (i<cloudList.length)) ; i++) { clouds += cloudList[i][0] + cloudList[i][1] + ' '; }
+  if ((cloudList.length == 1) && (cloudList[0].length == 3) && (cloudList[0][2] !== '')) {
+    clouds = cloudList[0].join('');
+  } else {
+    for (i=0; ((i<2) && (i<cloudList.length)) ; i++) { clouds += cloudList[i][0] + cloudList[i][1] + ' '; }
+  }
   clouds = clouds.trim();
   if (clouds === '') { clouds = 'SKY  CLR'; }
   //Other WX
@@ -426,60 +448,123 @@ function prepareDataForPebble() {
   }
 }
 
-function updateMETAR() {
-  console.log('Getting Metar');
-  var url = 'http://www.aviationweather.gov/metar/data?ids='+stationID+'&format=raw&date=0&hours=0';
+function sendDictionaryToPebble(dictionary) {
+  Pebble.sendAppMessage(dictionary,
+    function(e) {
+      console.log('METAR info sent to Pebble successfully!');
+    },
+    function(e) {
+      console.log('Error sending METAR info to Pebble!');
+    }
+  );
+}
+
+/*
+   This function takes the raw html either from aviationweather.gov or geonames.org ,
+   extracts the METAR report, parses it, and returns the value dictionary to the Pebble
+*/
+function parseMetarAndSendToPebble(responseText) {
+  console.log('Recieved Response');
+  var metar = '';
+  if (getNearest) {
+    metar = parseXML(responseText);
+  } else {
+    metar = parseHTML(responseText);
+  }
+  //var metar = '';
+  console.log(metar);
+  if (metar === '') {
+    time = ':(';
+    windSpeed = "I COULDN'T" ;
+    otherWX = 'GET YOUR';
+    clouds = 'STATION';
+  } else {
+    parseMETAR(metar);
+    flightCondition = getFlightRules(visibility , getCeiling(cloudList));
+    console.log('Flight Rules = ' + flightCondition);
+    prepareDataForPebble();
+  }
+  
+  var dictionary = {
+    'KEY_STATION': stationID,
+    'KEY_CONDITION': flightCondition,
+    'KEY_ISSUE_TIME': time,
+    'KEY_PARSER_TYPE': parserType,
+    'KEY_WIND_DIRECTION': windDirection,
+    'KEY_WIND_SPEED': windSpeed,
+    'KEY_TEMPERATURE': temperature,
+    'KEY_DEWPOINT': dewpoint,
+    'KEY_ALTIMETER': altimeter,
+    'KEY_VISIBILITY': visibility,
+    'KEY_OTHER_WX': otherWX,
+    'KEY_CLOUDS': clouds
+  };
+  //console.log('Dictionary being returned: ' + JSON.stringify(dictionary));
+
+  // Send to Pebble
+  sendDictionaryToPebble(dictionary);
+}
+
+function locationSuccess(pos) {
+  var latitude = pos.coords.latitude;
+  var longitude = pos.coords.longitude;
+  console.log('Latitude = ' + latitude.toString());
+  console.log('Longitude = ' + longitude.toString());
+  var url = 'http://api.geonames.org/findNearByWeatherJSON?lat=' + latitude + '&lng=' + longitude + '&username=flyinactor91';
   xhrRequest(url, 'GET', 
     function(responseText) {
-      console.log('Recieved Response');
-      var metar = parseHTML(responseText);
-      //var metar = '';
-      console.log(metar);
-      if (metar === '') {
-        time = ':(';
-        windSpeed = "I couldn't" ;
-        otherWX = 'retrieve';
-        clouds = 'your station';
-      } else {
-        parseMETAR(metar);
-        flightCondition = getFlightRules(visibility , getCeiling(cloudList));
-        console.log('Flight Rules = ' + flightCondition);
-        prepareDataForPebble();
-      }
-      
-      var dictionary = {
-        'KEY_STATION': stationID,
-        'KEY_CONDITION': flightCondition,
-        'KEY_ISSUE_TIME': time,
-        'KEY_PARSER_TYPE': parserType,
-        'KEY_WIND_DIRECTION': windDirection,
-        'KEY_WIND_SPEED': windSpeed,
-        'KEY_TEMPERATURE': temperature,
-        'KEY_DEWPOINT': dewpoint,
-        'KEY_ALTIMETER': altimeter,
-        'KEY_VISIBILITY': visibility,
-        'KEY_OTHER_WX': otherWX,
-        'KEY_CLOUDS': clouds
-      };
-      //console.log('Dictionary being returned: ' + dictionary.toString());
-      
-      // Send to Pebble
-      Pebble.sendAppMessage(dictionary,
-        function(e) {
-          console.log('METAR info sent to Pebble successfully!');
-        },
-        function(e) {
-          console.log('Error sending METAR info to Pebble!');
-        }
-      );
+      parseMetarAndSendToPebble(responseText);
     }      
   );
+}
+
+function locationError(err) {
+  console.log('Error requesting location!');
+  var dictionary = {
+    'KEY_STATION': stationID,
+    'KEY_CONDITION': flightCondition,
+    'KEY_ISSUE_TIME': ':(',
+    'KEY_PARSER_TYPE': parserType,
+    'KEY_WIND_DIRECTION': windDirection,
+    'KEY_WIND_SPEED': 'I NEED',
+    'KEY_TEMPERATURE': temperature,
+    'KEY_DEWPOINT': dewpoint,
+    'KEY_ALTIMETER': altimeter,
+    'KEY_VISIBILITY': visibility,
+    'KEY_OTHER_WX': 'LOCATION',
+    'KEY_CLOUDS': 'PERMISION'
+  };
+  sendDictionaryToPebble(dictionary);
+}
+
+function useGeoURL() {
+  navigator.geolocation.getCurrentPosition(
+    locationSuccess,
+    locationError,
+    {timeout: 15000, maximumAge: 60000}
+  );
+}
+
+function updateMETAR() {
+  console.log('getNearest = ' + getNearest.toString());
+  if (getNearest) {
+    console.log('Getting nearest METAR station');
+    useGeoURL();
+  } else {
+    var url = 'http://www.aviationweather.gov/metar/data?ids='+stationID+'&format=raw&date=0&hours=0';
+    xhrRequest(url, 'GET', 
+      function(responseText) {
+        console.log('Getting set METAR station');
+        parseMetarAndSendToPebble(responseText);
+      }      
+    );
+  }
 }
 
 // Listen for when the watchface is opened
 Pebble.addEventListener('ready', 
   function(e) {
-    console.log('PebbleKit JS ready!');
+    console.log("PebbleKit JS ready!");
     updateMETAR();
   }
 );
@@ -495,15 +580,19 @@ Pebble.addEventListener('appmessage',
 Pebble.addEventListener('showConfiguration', function(e) {
   // Show config page
   console.log('Now showing config page');
-  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup.html');
+  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup-2-1.html');
 });
 
 Pebble.addEventListener('webviewclosed',
   function(e) {
+    console.log(e.response.length);
     console.log('Configuration window returned: ' + e.response);
-    var options = JSON.parse(decodeURIComponent(e.response));
-    //console.log("Options = " + JSON.stringify(options));
-    localStorage.setItem('stationID', options.stationID);
-    updateMETAR();
+    if (e.response.length !== 0) {
+      var options = JSON.parse(decodeURIComponent(e.response));
+      console.log('Options = ' + JSON.stringify(options));
+      if (options.stationID !== '') { localStorage.setItem('stationID', options.stationID); }
+      localStorage.setItem('getNearest', options.getNearest);
+      //updateMETAR();
+    }
   }
 );

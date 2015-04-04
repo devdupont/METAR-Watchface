@@ -14,6 +14,7 @@
         "KEY_WIND_SPEED": 5
     },
     "capabilities": [
+        "location",
         "configurable"
     ],
     "companyName": "Michael duPont",
@@ -61,7 +62,7 @@
     "shortName": "METAR Watch",
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
     "versionCode": 1,
-    "versionLabel": "2.0",
+    "versionLabel": "2.1",
     "watchapp": {
         "watchface": true
     }
