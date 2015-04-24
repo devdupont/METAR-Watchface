@@ -22,6 +22,10 @@ var visibility = '';
 var clouds = '';
 var otherWX = '';
 var flightCondition = '';
+var time = new Date();
+var gmtOffset = time.getTimezoneOffset();
+//console.log('TZOffset = ' + gmtOffset.toString());
+var issueInts = [];
 
 //--------Vars to preserve parity with other versions of the parser
 var remarks = '';
@@ -390,7 +394,10 @@ function getFlightRules(vis , splitCloud) {
 function prepareDataForPebble() {
   var i;
   //Time
-  time = time.substring(2,4) + ':' + time.substring(4);
+  time = time.substring(2,4) + ':' + time.substring(4,6);
+  issueInts = time.split(':');
+  console.log('Time: ' + time);
+  console.log('Issue Ints: ' + issueInts.toString());
   //Wind
   if ((windSpeed == '00') || (windSpeed === '')) {
     windSpeed = 'CALM';
@@ -489,7 +496,8 @@ function parseMetarAndSendToPebble(responseText) {
     'KEY_STATION': stationID,
     'KEY_CONDITION': flightCondition,
     'KEY_ISSUE_TIME': time,
-    'KEY_PARSER_TYPE': parserType,
+    'KEY_ISSUE_HOUR': parseInt(issueInts[0]),
+    'KEY_ISSUE_MINUTE': parseInt(issueInts[1]),
     'KEY_WIND_DIRECTION': windDirection,
     'KEY_WIND_SPEED': windSpeed,
     'KEY_TEMPERATURE': temperature,
@@ -497,7 +505,8 @@ function parseMetarAndSendToPebble(responseText) {
     'KEY_ALTIMETER': altimeter,
     'KEY_VISIBILITY': visibility,
     'KEY_OTHER_WX': otherWX,
-    'KEY_CLOUDS': clouds
+    'KEY_CLOUDS': clouds,
+    'KEY_OFFSET': gmtOffset
   };
   //console.log('Dictionary being returned: ' + JSON.stringify(dictionary));
 
@@ -524,7 +533,8 @@ function locationError(err) {
     'KEY_STATION': stationID,
     'KEY_CONDITION': flightCondition,
     'KEY_ISSUE_TIME': ':(',
-    'KEY_PARSER_TYPE': parserType,
+    'KEY_ISSUE_HOUR': '00',
+    'KEY_ISSUE_MINUTE': '00',
     'KEY_WIND_DIRECTION': windDirection,
     'KEY_WIND_SPEED': 'I NEED',
     'KEY_TEMPERATURE': temperature,
@@ -532,7 +542,8 @@ function locationError(err) {
     'KEY_ALTIMETER': altimeter,
     'KEY_VISIBILITY': visibility,
     'KEY_OTHER_WX': 'LOCATION',
-    'KEY_CLOUDS': 'PERMISION'
+    'KEY_CLOUDS': 'PERMISION',
+    'KEY_OFFSET': gmtOffset
   };
   sendDictionaryToPebble(dictionary);
 }

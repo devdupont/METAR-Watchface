@@ -1,17 +1,19 @@
 {
     "appKeys": {
-        "KEY_ALTIMETER": 8,
-        "KEY_CLOUDS": 11,
+        "KEY_ALTIMETER": 9,
+        "KEY_CLOUDS": 12,
         "KEY_CONDITION": 1,
-        "KEY_DEWPOINT": 7,
+        "KEY_DEWPOINT": 8,
+        "KEY_ISSUE_HOUR": 3,
+        "KEY_ISSUE_MINUTE": 4,
         "KEY_ISSUE_TIME": 2,
-        "KEY_OTHER_WX": 10,
-        "KEY_PARSER_TYPE": 3,
+        "KEY_OFFSET": 13,
+        "KEY_OTHER_WX": 11,
         "KEY_STATION": 0,
-        "KEY_TEMPERATURE": 6,
-        "KEY_VISIBILITY": 9,
-        "KEY_WIND_DIRECTION": 4,
-        "KEY_WIND_SPEED": 5
+        "KEY_TEMPERATURE": 7,
+        "KEY_VISIBILITY": 10,
+        "KEY_WIND_DIRECTION": 5,
+        "KEY_WIND_SPEED": 6
     },
     "capabilities": [
         "location",
@@ -62,7 +64,7 @@
     "shortName": "METAR Watch",
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
     "versionCode": 1,
-    "versionLabel": "2.1",
+    "versionLabel": "2.2",
     "watchapp": {
         "watchface": true
     }

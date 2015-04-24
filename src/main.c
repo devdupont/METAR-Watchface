@@ -5,15 +5,18 @@
 #define KEY_STATION 0
 #define KEY_CONDITION 1
 #define KEY_ISSUE_TIME 2
-#define KEY_PARSER_TYPE 3
-#define KEY_WIND_DIRECTION 4
-#define KEY_WIND_SPEED 5
-#define KEY_TEMPERATURE 6
-#define KEY_DEWPOINT 7
-#define KEY_ALTIMETER 8
-#define KEY_VISIBILITY 9
-#define KEY_OTHER_WX 10
-#define KEY_CLOUDS 11
+#define KEY_ISSUE_HOUR 3
+#define KEY_ISSUE_MINUTE 4
+#define KEY_WIND_DIRECTION 5
+#define KEY_WIND_SPEED 6
+#define KEY_TEMPERATURE 7
+#define KEY_DEWPOINT 8
+#define KEY_ALTIMETER 9
+#define KEY_VISIBILITY 10
+#define KEY_OTHER_WX 11
+#define KEY_CLOUDS 12
+#define KEY_OFFSET 13
+
 
 #define UPDATE_INTERVAL 15 //minutes
 #define FAIL_RETRY_INTERVAL 5 //minutes
@@ -25,8 +28,9 @@ static Window *s_main_window;
 static TextLayer *s_header_time_layer;
 static TextLayer *s_header_station_layer;
 static TextLayer *s_header_condition_layer;
+static TextLayer *s_row1_zulu_time_layer;
 static TextLayer *s_row1_issue_time_layer;
-static TextLayer *s_row1_parser_type_layer;
+static TextLayer *s_row1_difference_time_layer;
 static TextLayer *s_row2_wind_direction_layer;
 static TextLayer *s_row2_wind_speed_layer;
 static TextLayer *s_row3_temperature_layer;
@@ -38,7 +42,7 @@ static TextLayer *s_row5_cloud_layer;
 //Fonts
 static GFont *s_header_time_font;
 static GFont *s_header_small_font;
-static GFont *s_row_regular_font;
+//static GFont *s_row_regular_font;
 static GFont *s_row_condensed_font;
 //Background
 static BitmapLayer *s_background_layer;
@@ -46,6 +50,9 @@ static GBitmap *s_background_bitmap;
 
 int updateTimer;
 int failedUpdateTimer;
+int gmtOffset;
+int issueHour;
+int issueMinute;
 
 //--------------------------------Pebble UI Loading Functions--------------------------------//
 
@@ -78,24 +85,33 @@ static void header_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_header_condition_layer));
 }
 
-static void row1_load(Window *window) {
-  //----Parser Type Layer----//
-  s_row1_parser_type_layer = text_layer_create(GRect(-1, 42, 25, 25));
-  text_layer_set_background_color(s_row1_parser_type_layer, GColorClear);
-  text_layer_set_text_color(s_row1_parser_type_layer, GColorBlack);
-  text_layer_set_text(s_row1_parser_type_layer, "");
-  text_layer_set_font(s_row1_parser_type_layer, s_row_regular_font);
-  text_layer_set_text_alignment(s_row1_parser_type_layer, GTextAlignmentCenter);
-  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_parser_type_layer));
+static void row1_load(Window *window) {  
+  //----Zulu Time Layer----//
+  s_row1_zulu_time_layer = text_layer_create(GRect(3, 42, 42, 25));
+  text_layer_set_background_color(s_row1_zulu_time_layer, GColorClear);
+  text_layer_set_text_color(s_row1_zulu_time_layer, GColorBlack);
+  text_layer_set_text(s_row1_zulu_time_layer, "00:00");
+  text_layer_set_font(s_row1_zulu_time_layer, s_row_condensed_font);
+  text_layer_set_text_alignment(s_row1_zulu_time_layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_zulu_time_layer));
   
   //----Issue Time Layer----//
-  s_row1_issue_time_layer = text_layer_create(GRect(49, 42, 90, 25));
+  s_row1_issue_time_layer = text_layer_create(GRect(74, 42, 42, 25));
   text_layer_set_background_color(s_row1_issue_time_layer, GColorClear);
   text_layer_set_text_color(s_row1_issue_time_layer, GColorBlack);
-  text_layer_set_text(s_row1_issue_time_layer, "UPDATE");
-  text_layer_set_font(s_row1_issue_time_layer, s_row_regular_font);
+  text_layer_set_text(s_row1_issue_time_layer, "UPDT");
+  text_layer_set_font(s_row1_issue_time_layer, s_row_condensed_font);
   text_layer_set_text_alignment(s_row1_issue_time_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_issue_time_layer));
+  
+  //----Difference Time Layer----//
+  s_row1_difference_time_layer = text_layer_create(GRect(120, 42, 22, 25));
+  text_layer_set_background_color(s_row1_difference_time_layer, GColorClear);
+  text_layer_set_text_color(s_row1_difference_time_layer, GColorBlack);
+  text_layer_set_text(s_row1_difference_time_layer, "--");
+  text_layer_set_font(s_row1_difference_time_layer, s_row_condensed_font);
+  text_layer_set_text_alignment(s_row1_difference_time_layer, GTextAlignmentCenter);
+  layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_difference_time_layer));
 }
 
 static void row2_load(Window *window) {
@@ -188,7 +204,7 @@ static void main_window_load(Window *window) {
   //----Set Fonts----//
   s_header_time_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_OPEN_SANS_CONDENSED_LIGHT_50));
   s_header_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_COUSINE_BOLD_20));
-  s_row_regular_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_MEDIUM_22));
+  //s_row_regular_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_ROBOTO_MEDIUM_22));
   s_row_condensed_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_OPEN_SANS_CONDENSED_LIGHT_22));
   
   //----Load Content Layers----//
@@ -207,8 +223,9 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_header_time_layer);
   text_layer_destroy(s_header_station_layer);
   text_layer_destroy(s_header_condition_layer);
+  text_layer_destroy(s_row1_zulu_time_layer);
   text_layer_destroy(s_row1_issue_time_layer);
-  text_layer_destroy(s_row1_parser_type_layer);
+  text_layer_destroy(s_row1_difference_time_layer);
   text_layer_destroy(s_row2_wind_direction_layer);
   text_layer_destroy(s_row2_wind_speed_layer);
   text_layer_destroy(s_row3_temperature_layer);
@@ -220,7 +237,7 @@ static void main_window_unload(Window *window) {
   //----Unload GFonts----//
   fonts_unload_custom_font(s_header_time_font);
   fonts_unload_custom_font(s_header_small_font);
-  fonts_unload_custom_font(s_row_regular_font);
+  //fonts_unload_custom_font(s_row_regular_font);
   fonts_unload_custom_font(s_row_condensed_font);
   //----Destroy Background----//
   gbitmap_destroy(s_background_bitmap);
@@ -229,14 +246,39 @@ static void main_window_unload(Window *window) {
 
 //--------------------------------Data Updating Functions--------------------------------//
 
-static void update_time() {
-  // Get a tm structure
-  time_t temp = time(NULL); 
-  struct tm *tick_time = localtime(&temp);
+/*char *itoa(int num)
+{
+static char buff[20] = {};
+int i = 0, temp_num = num, length = 0;
+char *string = buff;
+if(num >= 0) {
+// count how many characters in the number
+while(temp_num) {
+temp_num /= 10;
+length++;
+}
+// assign the number to the buffer starting at the end of the 
+// number and going to the begining since we are doing the
+// integer to character conversion on the last number in the
+// sequence
+for(i = 0; i < length; i++) {
+buff[(length-1)-i] = '0' + (num % 10);
+num /= 10;
+}
+buff[i] = '\0'; // can't forget the null byte to properly end our string
+}
+else
+return "Unsupported Number";
+return string;
+}*/
 
+static void update_time() {
+  //----Update Main Time Display----//
+  // Get a tm structure
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
   // Create a long-lived buffer
   static char buffer[] = "00:00";
-
   // Write the current hours and minutes into the buffer
   if(clock_is_24h_style() == true) {
     // Use 24 hour format
@@ -245,9 +287,44 @@ static void update_time() {
     // Use 12 hour format
     strftime(buffer, sizeof("00:00"), "%l:%M", tick_time);
   }
-
   // Display this time on the TextLayer
   text_layer_set_text(s_header_time_layer, buffer);
+  
+  //Thank you to Ben Koch for helping with the code below
+  
+  //----Update Zulu Time Display----//
+  time_t temp_gmt = time(NULL) + (gmtOffset*60);
+  struct tm *zulu_time = gmtime(&temp_gmt);
+  static char bufferZulu[] = "00:00";
+  strftime(bufferZulu, sizeof("00:00"), "%H:%M", zulu_time);
+  text_layer_set_text(s_row1_zulu_time_layer, bufferZulu);
+  
+  //----Update Difference Time Display----//
+  //Find minutes since last update
+  static char bufferHour[] = "00";
+  strftime(bufferHour, sizeof(bufferHour), "%H", zulu_time);
+  int gmtMinutes = (atoi(bufferHour))*60;
+  static char bufferMinute[] = "00";
+  strftime(bufferMinute, sizeof(bufferMinute), "%M", zulu_time);
+  gmtMinutes += atoi(bufferMinute);
+  int differenceMinutes = gmtMinutes - (issueHour*60) - issueMinute;
+  
+  //Correct errors, format, and display text
+  //Add (24*60) minutes if current time is past midnight and issued time is before midnight
+  if (differenceMinutes < 0) { differenceMinutes += 1440; }
+  /*APP_LOG(APP_LOG_LEVEL_INFO, itoa(gmtMinutes));
+  APP_LOG(APP_LOG_LEVEL_INFO, itoa(issueHour));
+  APP_LOG(APP_LOG_LEVEL_INFO, itoa(issueMinute));
+  APP_LOG(APP_LOG_LEVEL_INFO, itoa(differenceMinutes));*/
+  if (((issueHour < 1) && (issueMinute < 1)) || (differenceMinutes < 0)) { //If connection issue or watch start-up
+    text_layer_set_text(s_row1_difference_time_layer, "--");
+  } else if (differenceMinutes > 99) { //If report is older than 99 minutes
+    text_layer_set_text(s_row1_difference_time_layer, "++");
+  } else { //Else set the difference layer
+    static char bufferDifference[] = "00";
+    snprintf(bufferDifference, sizeof(bufferDifference), "%d", differenceMinutes);
+    text_layer_set_text(s_row1_difference_time_layer, bufferDifference);
+  }
 }
 
 static void auto_update_handler() {
@@ -267,11 +344,11 @@ static void auto_update_handler() {
     failedUpdateTimer = FAIL_RECOG_INTERVAL + 1;
     updateTimer = UPDATE_INTERVAL - FAIL_RETRY_INTERVAL;
     text_layer_set_text(s_row1_issue_time_layer, ":(");
+    text_layer_set_text(s_row1_difference_time_layer, "");
     text_layer_set_text(s_row2_wind_speed_layer, "Sorry I");
     text_layer_set_text(s_row4_other_wx_layer, "could not");
     text_layer_set_text(s_row5_cloud_layer, "connect");
     text_layer_set_text(s_header_condition_layer, "");
-    text_layer_set_text(s_row1_parser_type_layer, "");
     text_layer_set_text(s_row2_wind_direction_layer, "");
     text_layer_set_text(s_row3_temperature_layer, "");
     text_layer_set_text(s_row3_dewpoint_layer, "");
@@ -303,12 +380,6 @@ static void update_issue_time(Tuple *t) {
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_row1_issue_time_layer, buffer);
   layer_mark_dirty(text_layer_get_layer(s_row1_issue_time_layer));
-}
-
-static void update_parser_type(Tuple *t) {
-  static char buffer[8];
-  snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
-  text_layer_set_text(s_row1_parser_type_layer, buffer);
 }
 
 static void update_wind_direction(Tuple *t) {
@@ -380,9 +451,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_ISSUE_TIME:
       update_issue_time(t);
       break;
-    case KEY_PARSER_TYPE:
-      update_parser_type(t);
-      break;
     case KEY_WIND_DIRECTION:
       update_wind_direction(t);
       break;
@@ -407,6 +475,15 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     case KEY_CLOUDS:
       update_clouds(t);
       break;
+    case KEY_OFFSET:
+      gmtOffset = t->value->int16;
+      break;
+    case KEY_ISSUE_HOUR:
+      issueHour = t->value->int8;
+      break;
+    case KEY_ISSUE_MINUTE:
+      issueMinute = t->value->int8;
+      break;
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
       break;
@@ -417,6 +494,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   }
   APP_LOG(APP_LOG_LEVEL_INFO, "Setting to 3 after successful update");
   failedUpdateTimer = FAIL_RECOG_INTERVAL + 1;
+  update_time();
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -436,6 +514,9 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 static void init() {
   updateTimer = 0;
   failedUpdateTimer = 0;
+  gmtOffset = 0;
+  issueHour = 0;
+  issueMinute = 0;
   
   // Create main Window element and assign to pointer
   s_main_window = window_create();
