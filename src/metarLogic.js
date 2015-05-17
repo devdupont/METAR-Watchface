@@ -24,7 +24,7 @@ var otherWX = '';
 var flightCondition = '';
 var time = new Date();
 var gmtOffset = time.getTimezoneOffset();
-//console.log('TZOffset = ' + gmtOffset.toString());
+console.log('TZOffset = ' + gmtOffset.toString());
 var issueInts = [];
 
 //--------Vars to preserve parity with other versions of the parser

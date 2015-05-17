@@ -25,12 +25,12 @@
     "resources": {
         "media": [
             {
-                "file": "images/Background.png",
+                "file": "images/BackgroundBW.png",
                 "name": "BACKGROUND",
                 "type": "png"
             },
             {
-                "file": "images/AppIcon.png",
+                "file": "images/AppIconBW.png",
                 "menuIcon": true,
                 "name": "APP_ICON",
                 "type": "png"
@@ -60,11 +60,14 @@
             }
         ]
     },
-    "sdkVersion": "2",
+    "sdkVersion": "3",
     "shortName": "METAR Watch",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
-    "versionCode": 1,
-    "versionLabel": "2.2",
+    "versionLabel": "3.0",
     "watchapp": {
         "watchface": true
     }

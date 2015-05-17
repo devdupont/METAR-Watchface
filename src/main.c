@@ -293,7 +293,11 @@ static void update_time() {
   //Thank you to Ben Koch for helping with the code below
   
   //----Update Zulu Time Display----//
-  time_t temp_gmt = time(NULL) + (gmtOffset*60);
+  #ifdef PBL_SDK_2
+    time_t temp_gmt = time(NULL) + (gmtOffset*60);
+  #else
+    time_t temp_gmt = time(NULL);
+  #endif
   struct tm *zulu_time = gmtime(&temp_gmt);
   static char bufferZulu[] = "00:00";
   strftime(bufferZulu, sizeof("00:00"), "%H:%M", zulu_time);
@@ -373,6 +377,13 @@ static void update_condition(Tuple *t) {
   static char buffer[8];
   snprintf(buffer, sizeof(buffer), "%s", t->value->cstring);
   text_layer_set_text(s_header_condition_layer, buffer);
+  #ifdef PBL_COLOR
+  if (strcmp(buffer, "VFR") == 0) { text_layer_set_text_color(s_header_condition_layer, GColorIslamicGreen); }
+  else if (strcmp(buffer, "MVFR") == 0) { text_layer_set_text_color(s_header_condition_layer, GColorBlue); }
+  else if (strcmp(buffer, "IFR") == 0) { text_layer_set_text_color(s_header_condition_layer, GColorRed); }
+  else if (strcmp(buffer, "LIFR") == 0) { text_layer_set_text_color(s_header_condition_layer, GColorPurple); }
+  else { text_layer_set_text_color(s_header_condition_layer, GColorBlack); }
+  #endif
 }
 
 static void update_issue_time(Tuple *t) {
