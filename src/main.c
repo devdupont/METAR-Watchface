@@ -333,7 +333,7 @@ static void update_time() {
 
 static void auto_update_handler() {
   //Call for updated data if reached UPDATE_INTERVAL
-  if (updateTimer > UPDATE_INTERVAL) {
+  if (updateTimer > UPDATE_INTERVAL + FAIL_RECOG_INTERVAL) {
     updateTimer = 0;
     APP_LOG(APP_LOG_LEVEL_INFO, "Reseting counter to 0");
     failedUpdateTimer = 0;
