@@ -174,7 +174,7 @@ static void row4_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row4_visibility_layer));
   
   //----Other WX Layer----//
-  s_row4_other_wx_layer = text_layer_create(GRect(50, 117, 92, 23));
+  s_row4_other_wx_layer = text_layer_create(GRect(50, 117, 92, 26));
   text_layer_set_background_color(s_row4_other_wx_layer, GColorClear);
   text_layer_set_text_color(s_row4_other_wx_layer, GColorBlack);
   text_layer_set_text(s_row4_other_wx_layer, "");

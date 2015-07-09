@@ -44,7 +44,9 @@ function createPebbleDict(wxDict) {
   }
   //Altimeter
   var altimeter = wxDict.Altimeter;
-  if (altimeter.length == 4) { altimeter = altimeter.substring(0,2) + '.' + altimeter.substring(2); }
+  if ((altimeter.length == 4) && (wxDict.Units.Altimeter != 'hPa')) {
+    altimeter = altimeter.substring(0,2) + '.' + altimeter.substring(2);
+  }
   //Visibility
   var visibility = wxDict.Visibility;
   if (visibility == '9999') { visibility = '10'; }
@@ -77,7 +79,7 @@ function createPebbleDict(wxDict) {
   otherWX = otherWX.trim();
   //Amend Other WX
   if (otherWX === '') {
-    if (wxDict['Wind-Variable-Dir'].length == 2) {
+    if (('Wind-Variable-Dir' in wxDict) && (wxDict['Wind-Variable-Dir'].length == 2)) {
       otherWX = wxDict['Wind-Variable-Dir'][0] + 'V' + wxDict['Wind-Variable-Dir'][1];
     } else if ((otherWX.length < 4) && (wxDict.Remarks.indexOf('NOSIG') != -1)) {
       otherWX = 'NOSIG';
@@ -90,7 +92,7 @@ function createPebbleDict(wxDict) {
   //Create Dict
   console.log('Making Dict');
   var retDict = {
-    'KEY_STATION':stationID,
+    'KEY_STATION':wxDict.Station,
     'KEY_CONDITION':wxDict['Flight-Rules'],
     'KEY_ISSUE_TIME':time,
     'KEY_ISSUE_HOUR':parseInt(issueInts[0]),
@@ -231,7 +233,7 @@ Pebble.addEventListener('appmessage',
 Pebble.addEventListener('showConfiguration', function(e) {
   //Show config page
   console.log('Now showing config page');
-  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup.html');
+  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup-3-2.html?station=' + stationID + '&near=' + getNearest.toString());
 });
 
 //Listen for when user closes config page
