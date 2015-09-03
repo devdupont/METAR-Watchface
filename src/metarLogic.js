@@ -16,9 +16,48 @@ if (getNearest === 'true') {
 var stationID = localStorage.getItem('stationID');
 if ((stationID === null)||(stationID.length != 4)) { stationID = 'KJFK'; }
 
+//--------Dark Background
+var darkBackground = localStorage.getItem('darkBackground');
+if (darkBackground === 'true') {
+  darkBackground = true;
+} else {
+  darkBackground = false;
+}
+
 //--------GMT Offset
 var datetime = new Date();
 var gmtOffset = datetime.getTimezoneOffset();
+
+//Previous Display Data
+//If the phone cannot fetch new data, show the previous data and change 'KEY_SUCCESS' to false
+//If no previous data, return the default display data
+function getLastData() {
+  var retDict = localStorage.getItem('previousdata');
+  if (retDict === null) {
+    retDict = {
+        'KEY_STATION': stationID,
+        'KEY_CONDITION': '',
+        'KEY_ISSUE_TIME': ':(',
+        'KEY_ISSUE_HOUR': '00',
+        'KEY_ISSUE_MINUTE': '00',
+        'KEY_WIND_DIRECTION': '',
+        'KEY_WIND_SPEED': "I COULDN'T",
+        'KEY_TEMPERATURE': '',
+        'KEY_DEWPOINT': '',
+        'KEY_ALTIMETER': '',
+        'KEY_VISIBILITY': '',
+        'KEY_OTHER_WX': 'GET YOUR',
+        'KEY_CLOUDS': 'STATION',
+        'KEY_OFFSET': gmtOffset,
+        'KEY_DARKBG': darkBackground,
+        'KEY_SUCCESS': false
+      };
+  } else {
+    retDict = JSON.parse(retDict);
+    retDict.KEY_SUCCESS = false;
+  }
+  return retDict;
+}
 
 /******************************** Data formatting *********************************/
 
@@ -105,8 +144,11 @@ function createPebbleDict(wxDict) {
     'KEY_VISIBILITY': visibility,
     'KEY_OTHER_WX': otherWX,
     'KEY_CLOUDS': clouds,
-    'KEY_OFFSET': gmtOffset
+    'KEY_OFFSET': gmtOffset,
+    'KEY_DARKBG': darkBackground,
+    'KEY_SUCCESS': true
   };
+  localStorage.setItem('previousdata', JSON.stringify(retDict));
   return retDict;
 }
 
@@ -116,30 +158,26 @@ function createPebbleDict(wxDict) {
 //Calls handleRequest with fetched object
 //@param url The url to fetch
 var updateReport = function(url) {
+  //url = 'http://195.264.426.231';
   var request = new XMLHttpRequest();
-  request.onload = function() {
-    console.log(request.responseText);
-    var resp = JSON.parse(request.responseText);
-    if (('Error' in resp) || (!('Flight-Rules' in resp))) {
-      var dictionary = {
-        'KEY_STATION': stationID,
-        'KEY_CONDITION': '',
-        'KEY_ISSUE_TIME': ':(',
-        'KEY_ISSUE_HOUR': '00',
-        'KEY_ISSUE_MINUTE': '00',
-        'KEY_WIND_DIRECTION': '',
-        'KEY_WIND_SPEED': "I COULDN'T",
-        'KEY_TEMPERATURE': '',
-        'KEY_DEWPOINT': '',
-        'KEY_ALTIMETER': '',
-        'KEY_VISIBILITY': '',
-        'KEY_OTHER_WX': 'GET YOUR',
-        'KEY_CLOUDS': 'STATION',
-        'KEY_OFFSET': gmtOffset
-      };
-      sendDictionaryToPebble(dictionary);
-    } else {
-      sendDictionaryToPebble(createPebbleDict(resp));
+  request.onreadystatechange = function(e) {
+    console.log(request.readyState , request.statusText);
+    if (request.readyState == 4) {
+      if (request.status == 200) {
+        console.log(request.responseText);
+        if ((request.responseText !== null) && (request.responseText.charAt(0) == '{')) {
+          var resp = JSON.parse(request.responseText);
+          if (('Error' in resp) || (!('Flight-Rules' in resp))) {
+            sendDictionaryToPebble(getLastData());
+          } else {
+            sendDictionaryToPebble(createPebbleDict(resp));
+          }
+        } else {
+          sendDictionaryToPebble(getLastData());
+        }
+      } else {
+      sendDictionaryToPebble(getLastData());
+      }
     }
   };
   console.log('Now Fetching: ' + url);
@@ -174,7 +212,9 @@ function locationError(err) {
     'KEY_VISIBILITY': '',
     'KEY_OTHER_WX': 'LOCATION',
     'KEY_CLOUDS': 'PERMISION',
-    'KEY_OFFSET': gmtOffset
+    'KEY_OFFSET': gmtOffset,
+    'KEY_DARKBG': darkBackground,
+    'KEY_SUCCESS': false
   };
   sendDictionaryToPebble(dictionary);
 }
@@ -192,6 +232,7 @@ function useGeoURL() {
 
 //Send a dictionary to the Pebble
 function sendDictionaryToPebble(dictionary) {
+  console.log(JSON.stringify(dictionary));
   console.log('Sending Dict');
   Pebble.sendAppMessage(dictionary,
     function(e) {
@@ -233,7 +274,7 @@ Pebble.addEventListener('appmessage',
 Pebble.addEventListener('showConfiguration', function(e) {
   //Show config page
   console.log('Now showing config page');
-  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup-3-2.html?station=' + stationID + '&near=' + getNearest.toString());
+  Pebble.openURL('http://mdupont.com/Pebble-Config/pebble-metar-watchface-setup-3-3.html?station=' + stationID + '&near=' + getNearest.toString() + '&back=' + darkBackground.toString());
 });
 
 //Listen for when user closes config page
@@ -245,6 +286,7 @@ Pebble.addEventListener('webviewclosed',
       console.log('Options = ' + JSON.stringify(options));
       if (options.stationID !== '') { localStorage.setItem('stationID', options.stationID); }
       localStorage.setItem('getNearest', options.getNearest);
+      localStorage.setItem('darkBackground', options.darkBackground);
     }
   }
 );

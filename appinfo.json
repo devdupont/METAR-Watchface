@@ -3,6 +3,7 @@
         "KEY_ALTIMETER": 9,
         "KEY_CLOUDS": 12,
         "KEY_CONDITION": 1,
+        "KEY_DARKBG": 14,
         "KEY_DEWPOINT": 8,
         "KEY_ISSUE_HOUR": 3,
         "KEY_ISSUE_MINUTE": 4,
@@ -10,6 +11,7 @@
         "KEY_OFFSET": 13,
         "KEY_OTHER_WX": 11,
         "KEY_STATION": 0,
+        "KEY_SUCCESS": 15,
         "KEY_TEMPERATURE": 7,
         "KEY_VISIBILITY": 10,
         "KEY_WIND_DIRECTION": 5,
@@ -25,6 +27,11 @@
     "resources": {
         "media": [
             {
+                "file": "images/BackgroundBWAlt.png",
+                "name": "BACKGROUND_ALT",
+                "type": "png"
+            },
+            {
                 "file": "images/BackgroundBW.png",
                 "name": "BACKGROUND",
                 "type": "png"
@@ -34,12 +41,6 @@
                 "menuIcon": true,
                 "name": "APP_ICON",
                 "type": "png"
-            },
-            {
-                "characterRegex": "[A-Z0-9:.( ]",
-                "file": "fonts/Roboto-Medium.ttf",
-                "name": "ROBOTO_MEDIUM_22",
-                "type": "font"
             },
             {
                 "characterRegex": "[A-Z0-9]",
@@ -67,7 +68,7 @@
         "basalt"
     ],
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
-    "versionLabel": "3.2",
+    "versionLabel": "3.3",
     "watchapp": {
         "watchface": true
     }
