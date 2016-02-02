@@ -29,18 +29,18 @@
             {
                 "file": "images/BackgroundBWAlt.png",
                 "name": "BACKGROUND_ALT",
-                "type": "png"
-            },
-            {
-                "file": "images/BackgroundBW.png",
-                "name": "BACKGROUND",
-                "type": "png"
+                "type": "bitmap"
             },
             {
                 "file": "images/AppIconBW.png",
                 "menuIcon": true,
                 "name": "APP_ICON",
-                "type": "png"
+                "type": "bitmap"
+            },
+            {
+                "file": "images/BackgroundBW.png",
+                "name": "BACKGROUND",
+                "type": "bitmap"
             },
             {
                 "characterRegex": "[A-Z0-9]",
@@ -68,7 +68,7 @@
         "basalt"
     ],
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
-    "versionLabel": "3.3",
+    "versionLabel": "3.5",
     "watchapp": {
         "watchface": true
     }

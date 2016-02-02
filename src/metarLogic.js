@@ -176,7 +176,7 @@ var updateReport = function(url) {
           sendDictionaryToPebble(getLastData());
         }
       } else {
-      sendDictionaryToPebble(getLastData());
+        sendDictionaryToPebble(getLastData());
       }
     }
   };
@@ -267,7 +267,7 @@ Pebble.addEventListener('appmessage',
   function(e) {
     console.log('AppMessage received!');
     handleUpdate();
-  }                     
+  }
 );
 
 //Listen for when user opens config page

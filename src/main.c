@@ -22,7 +22,7 @@
 #define KEY_C_USE_DARK 0
 #define KEY_C_GMT_OFFSET 1
 
-#define UPDATE_INTERVAL 10 //minutes
+#define UPDATE_INTERVAL 15 //minutes
 #define FAIL_RETRY_INTERVAL 5 //minutes
 #define FAIL_RECOG_INTERVAL 2 //minutes
 
@@ -44,9 +44,9 @@ static TextLayer *s_row4_visibility_layer;
 static TextLayer *s_row4_other_wx_layer;
 static TextLayer *s_row5_cloud_layer;
 //Fonts
-static GFont *s_header_time_font;
-static GFont *s_header_small_font;
-static GFont *s_row_condensed_font;
+static GFont s_header_time_font;
+static GFont s_header_small_font;
+static GFont s_row_condensed_font;
 //Background
 static BitmapLayer *s_background_layer;
 static GBitmap *s_background_bitmap;
@@ -311,7 +311,7 @@ static void update_time() {
   //Thank you to Ben Koch for helping with the code below
   
   //----Update Zulu Time Display----//
-  #ifdef PBL_SDK_2
+  #ifdef PBL_PLATFORM_APLITE
     time_t temp_gmt = time(NULL) + (gmtOffset*60);
   #else
     time_t temp_gmt = time(NULL);
@@ -355,14 +355,21 @@ static void auto_update_handler() {
     updateTimer = 0;
     APP_LOG(APP_LOG_LEVEL_INFO, "Reseting counter to 0");
     failedUpdateTimer = 0;
-    app_message_outbox_send(); //Sending empty outbox requests new updated inbox
+    
+    #ifdef PBL_SDK_3
+    //The phone won't read it, but we need a dict to execute the outbox call
+    DictionaryIterator *iter;
+    app_message_outbox_begin(&iter);
+    dict_write_uint8(iter, 0, 0);
+    #endif
+    app_message_outbox_send();
   } else {
     updateTimer++;
     failedUpdateTimer++;
     APP_LOG(APP_LOG_LEVEL_INFO, "Incremented counter");
   }
   if (failedUpdateTimer == FAIL_RECOG_INTERVAL) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Set bad screen and counter to 3");
+    APP_LOG(APP_LOG_LEVEL_INFO, "Set bad screen and counter to fail_recog+1");
     failedUpdateTimer = FAIL_RECOG_INTERVAL + 1;
     updateTimer = UPDATE_INTERVAL - FAIL_RETRY_INTERVAL;
     text_layer_set_text(s_row1_issue_time_layer, ":(");
@@ -602,7 +609,8 @@ static void init() {
   app_message_register_outbox_sent(outbox_sent_callback);
   
   // Open AppMessage
-  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  //app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_open(800, 0);
 }
 
 static void deinit() {
