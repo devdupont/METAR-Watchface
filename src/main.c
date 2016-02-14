@@ -63,7 +63,11 @@ int useDark;
 
 static void header_load(Window *window) {
   //----Current Time TextLayer----//
+  #if defined(PBL_RECT)
   s_header_time_layer = text_layer_create(GRect(1, -10, 90, 50));
+  #elif defined(PBL_ROUND)
+  s_header_time_layer = text_layer_create(GRect(16, 58, 90, 50));
+  #endif
   text_layer_set_background_color(s_header_time_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_header_time_layer, GColorWhite); }
   else { text_layer_set_text_color(s_header_time_layer, GColorBlack); }
@@ -73,7 +77,11 @@ static void header_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_header_time_layer));
   
   //----Station TextLayer----//
+  #if defined(PBL_RECT)
   s_header_station_layer = text_layer_create(GRect(94, -3, 50, 22));
+  #elif defined(PBL_ROUND)
+  s_header_station_layer = text_layer_create(GRect(117, 65, 50, 22));
+  #endif
   text_layer_set_background_color(s_header_station_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_header_station_layer, GColorWhite); }
   else { text_layer_set_text_color(s_header_station_layer, GColorBlack); }
@@ -83,7 +91,11 @@ static void header_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_header_station_layer));
   
   //----Condition TextLayer----//
+  #if defined(PBL_RECT)
   s_header_condition_layer = text_layer_create(GRect(93, 20, 50, 22));
+  #elif defined(PBL_ROUND)
+  s_header_condition_layer = text_layer_create(GRect(116, 88, 50, 22));
+  #endif
   text_layer_set_background_color(s_header_condition_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_header_condition_layer, GColorWhite); }
   else { text_layer_set_text_color(s_header_condition_layer, GColorBlack); }
@@ -95,7 +107,11 @@ static void header_load(Window *window) {
 
 static void row1_load(Window *window) {  
   //----Zulu Time Layer----//
+  #if defined(PBL_RECT)
   s_row1_zulu_time_layer = text_layer_create(GRect(3, 43, 42, 25));
+  #elif defined(PBL_ROUND)
+  s_row1_zulu_time_layer = text_layer_create(GRect(23, 108, 42, 25));
+  #endif
   text_layer_set_background_color(s_row1_zulu_time_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row1_zulu_time_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row1_zulu_time_layer, GColorBlack); }
@@ -105,7 +121,11 @@ static void row1_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_zulu_time_layer));
   
   //----Issue Time Layer----//
+  #if defined(PBL_RECT)
   s_row1_issue_time_layer = text_layer_create(GRect(74, 43, 42, 25));
+  #elif defined(PBL_ROUND)
+  s_row1_issue_time_layer = text_layer_create(GRect(92, 108, 42, 25));
+  #endif
   text_layer_set_background_color(s_row1_issue_time_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row1_issue_time_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row1_issue_time_layer, GColorBlack); }
@@ -115,7 +135,11 @@ static void row1_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row1_issue_time_layer));
   
   //----Difference Time Layer----//
+  #if defined(PBL_RECT)
   s_row1_difference_time_layer = text_layer_create(GRect(120, 43, 22, 25));
+  #elif defined(PBL_ROUND)
+  s_row1_difference_time_layer = text_layer_create(GRect(138, 108, 22, 25));
+  #endif
   text_layer_set_background_color(s_row1_difference_time_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row1_difference_time_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row1_difference_time_layer, GColorBlack); }
@@ -127,7 +151,11 @@ static void row1_load(Window *window) {
 
 static void row2_load(Window *window) {
   //----Wind Direction Layer----//
+  #if defined(PBL_RECT)
   s_row2_wind_direction_layer = text_layer_create(GRect(21, 67, 40, 23));
+  #elif defined(PBL_ROUND)
+  s_row2_wind_direction_layer = text_layer_create(GRect(31, 21, 40, 23));
+  #endif
   text_layer_set_background_color(s_row2_wind_direction_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row2_wind_direction_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row2_wind_direction_layer, GColorBlack); }
@@ -137,7 +165,11 @@ static void row2_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row2_wind_direction_layer));
   
   //----Wind Speed Layer----//
+  #if defined(PBL_RECT)
   s_row2_wind_speed_layer = text_layer_create(GRect(57, 67, 86, 23));
+  #elif defined(PBL_ROUND)
+  s_row2_wind_speed_layer = text_layer_create(GRect(78, 21, 86, 23));
+  #endif
   text_layer_set_background_color(s_row2_wind_speed_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row2_wind_speed_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row2_wind_speed_layer, GColorBlack); }
@@ -149,7 +181,11 @@ static void row2_load(Window *window) {
 
 static void row3_load(Window *window) {
   //----Temperature Layer----//
+  #if defined(PBL_RECT)
   s_row3_temperature_layer = text_layer_create(GRect(11, 92, 28, 23));
+  #elif defined(PBL_ROUND)
+  s_row3_temperature_layer = text_layer_create(GRect(62, 0, 28, 23));
+  #endif
   text_layer_set_background_color(s_row3_temperature_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row3_temperature_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row3_temperature_layer, GColorBlack); }
@@ -159,7 +195,11 @@ static void row3_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row3_temperature_layer));
   
   //----Dewpoint Layer----//
+  #if defined(PBL_RECT)
   s_row3_dewpoint_layer = text_layer_create(GRect(49, 92, 28, 23));
+  #elif defined(PBL_ROUND)
+  s_row3_dewpoint_layer = text_layer_create(GRect(90, 0, 28, 23));
+  #endif
   text_layer_set_background_color(s_row3_dewpoint_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row3_dewpoint_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row3_dewpoint_layer, GColorBlack); }
@@ -169,7 +209,11 @@ static void row3_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row3_dewpoint_layer));
   
   //----Altimeter Layer----//
+  #if defined(PBL_RECT)
   s_row3_altimeter_layer = text_layer_create(GRect(96, 92, 46, 23));
+  #elif defined(PBL_ROUND)
+  s_row3_altimeter_layer = text_layer_create(GRect(70, 152, 46, 23));
+  #endif
   text_layer_set_background_color(s_row3_altimeter_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row3_altimeter_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row3_altimeter_layer, GColorBlack); }
@@ -181,7 +225,11 @@ static void row3_load(Window *window) {
 
 static void row4_load(Window *window) {
   //----Visibility Layer----//
+  #if defined(PBL_RECT)
   s_row4_visibility_layer = text_layer_create(GRect(23, 117, 28, 23));
+  #elif defined(PBL_ROUND)
+  s_row4_visibility_layer = text_layer_create(GRect(39, 131, 28, 23));
+  #endif
   text_layer_set_background_color(s_row4_visibility_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row4_visibility_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row4_visibility_layer, GColorBlack); }
@@ -191,7 +239,11 @@ static void row4_load(Window *window) {
   layer_add_child(window_get_root_layer(window), text_layer_get_layer(s_row4_visibility_layer));
   
   //----Other WX Layer----//
+  #if defined(PBL_RECT)
   s_row4_other_wx_layer = text_layer_create(GRect(50, 117, 92, 26));
+  #elif defined(PBL_ROUND)
+  s_row4_other_wx_layer = text_layer_create(GRect(64, 131, 92, 26));
+  #endif
   text_layer_set_background_color(s_row4_other_wx_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row4_other_wx_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row4_other_wx_layer, GColorBlack); }
@@ -203,7 +255,11 @@ static void row4_load(Window *window) {
 
 static void row5_load(Window *window) {
   //----Cloud Layer----//
+  #if defined(PBL_RECT)
   s_row5_cloud_layer = text_layer_create(GRect(20, 142, 122, 23));
+  #elif defined(PBL_ROUND)
+  s_row5_cloud_layer = text_layer_create(GRect(40, 44, 130, 23));
+  #endif
   text_layer_set_background_color(s_row5_cloud_layer, GColorClear);
   if (useDark) { text_layer_set_text_color(s_row5_cloud_layer, GColorWhite); }
   else { text_layer_set_text_color(s_row5_cloud_layer, GColorBlack); }
@@ -217,7 +273,8 @@ static void main_window_load(Window *window) {
   //----Load Background----//
   if (useDark) { s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BACKGROUND_ALT); }
   else { s_background_bitmap = gbitmap_create_with_resource(RESOURCE_ID_BACKGROUND); }
-  s_background_layer = bitmap_layer_create(GRect(0, 0, 144, 168));
+  //Create a background layer regardless of screen size
+  s_background_layer = bitmap_layer_create(layer_get_bounds(window_get_root_layer(window)));
   bitmap_layer_set_bitmap(s_background_layer, s_background_bitmap);
   layer_add_child(window_get_root_layer(window), bitmap_layer_get_layer(s_background_layer));
   
@@ -363,6 +420,7 @@ static void auto_update_handler() {
     dict_write_uint8(iter, 0, 0);
     #endif
     app_message_outbox_send();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Requesting update");
   } else {
     updateTimer++;
     failedUpdateTimer++;
@@ -375,8 +433,13 @@ static void auto_update_handler() {
     text_layer_set_text(s_row1_issue_time_layer, ":(");
     text_layer_set_text(s_row1_difference_time_layer, "");
     text_layer_set_text(s_row2_wind_speed_layer, "Sorry I");
+    #if defined(PBL_RECT)
     text_layer_set_text(s_row4_other_wx_layer, "could not");
     text_layer_set_text(s_row5_cloud_layer, "connect");
+    #elif defined(PBL_ROUND)
+    text_layer_set_text(s_row4_other_wx_layer, "connect");
+    text_layer_set_text(s_row5_cloud_layer, "could not");
+    #endif
     text_layer_set_text(s_header_condition_layer, "");
     text_layer_set_text(s_row2_wind_direction_layer, "");
     text_layer_set_text(s_row3_temperature_layer, "");
@@ -610,7 +673,7 @@ static void init() {
   
   // Open AppMessage
   //app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-  app_message_open(800, 0);
+  app_message_open(1080, 64);
 }
 
 static void deinit() {

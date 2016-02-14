@@ -22,24 +22,28 @@
         "configurable"
     ],
     "companyName": "Michael duPont",
+    "enableMultiJS": true,
     "longName": "METAR Watchface",
     "projectType": "native",
     "resources": {
         "media": [
             {
-                "file": "images/BackgroundBWAlt.png",
+                "file": "images/BackgroundAlt.png",
                 "name": "BACKGROUND_ALT",
+                "targetPlatforms": null,
                 "type": "bitmap"
             },
             {
-                "file": "images/AppIconBW.png",
+                "file": "images/AppIcon.png",
                 "menuIcon": true,
                 "name": "APP_ICON",
+                "targetPlatforms": null,
                 "type": "bitmap"
             },
             {
-                "file": "images/BackgroundBW.png",
+                "file": "images/Background.png",
                 "name": "BACKGROUND",
+                "targetPlatforms": null,
                 "type": "bitmap"
             },
             {
@@ -65,10 +69,11 @@
     "shortName": "METAR Watch",
     "targetPlatforms": [
         "aplite",
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "7a57a498-fc22-4f07-a05c-4e67cf34fbb0",
-    "versionLabel": "3.5",
+    "versionLabel": "3.6",
     "watchapp": {
         "watchface": true
     }

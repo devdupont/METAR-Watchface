@@ -1,4 +1,4 @@
-/* AVWX - metarBrain.js
+/* AVWX - app.js
  * Michael duPont
  * Displays the current flight rules for a given station
  * Ties into avwx.rest, my public aviation weather service
@@ -46,8 +46,8 @@ function getLastData() {
         'KEY_DEWPOINT': '',
         'KEY_ALTIMETER': '',
         'KEY_VISIBILITY': '',
-        'KEY_OTHER_WX': 'GET YOUR',
-        'KEY_CLOUDS': 'STATION',
+        'KEY_OTHER_WX': 'UPDATE',
+        'KEY_CLOUDS': '',
         'KEY_OFFSET': gmtOffset,
         'KEY_DARKBG': darkBackground,
         'KEY_SUCCESS': false
@@ -148,6 +148,25 @@ function createPebbleDict(wxDict) {
     'KEY_DARKBG': darkBackground,
     'KEY_SUCCESS': true
   };
+  //This replacement is used during design work and has the most info per field
+  /*retDict = {
+    'KEY_STATION':wxDict.Station,
+    'KEY_CONDITION':'MVFR',
+    'KEY_ISSUE_TIME':time,
+    'KEY_ISSUE_HOUR':parseInt(issueInts[0]),
+    'KEY_ISSUE_MINUTE':parseInt(issueInts[1]),
+    'KEY_WIND_DIRECTION': '333\xB0',
+    'KEY_WIND_SPEED': '12G22kt',
+    'KEY_TEMPERATURE': '-04',
+    'KEY_DEWPOINT': '-04',
+    'KEY_ALTIMETER': '29.92',
+    'KEY_VISIBILITY': '4.5',
+    'KEY_OTHER_WX': 'VCTS SHRA',
+    'KEY_CLOUDS': 'BKN005 OVC010',
+    'KEY_OFFSET': gmtOffset,
+    'KEY_DARKBG': darkBackground,
+    'KEY_SUCCESS': true
+  };*/
   localStorage.setItem('previousdata', JSON.stringify(retDict));
   return retDict;
 }
@@ -239,13 +258,14 @@ function sendDictionaryToPebble(dictionary) {
       console.log('Status sent to Pebble successfully!');
     },
     function(e) {
-      console.log('Error sending status to Pebble!');
+      console.log('Error sending status to Pebble!', e);
     }
   );
 }
 
 //Handler for update request
 function handleUpdate() {
+  console.log('Now updating');
   if (getNearest === true) {
     useGeoURL();
   } else {
