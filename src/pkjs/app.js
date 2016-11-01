@@ -269,7 +269,7 @@ function handleUpdate() {
   if (getNearest === true) {
     useGeoURL();
   } else {
-    var url = 'http://avwx.rest/api/metar.php?station=' + stationID + '&format=JSON';
+    var url = 'http://avwx.rest/api/metar/' + stationID;
     updateReport(url);
   }
 }

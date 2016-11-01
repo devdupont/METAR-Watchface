@@ -368,7 +368,7 @@ static void update_time() {
   //Thank you to Ben Koch for helping with the code below
   
   //----Update Zulu Time Display----//
-  #ifdef PBL_PLATFORM_APLITE
+  #ifdef PBL_SDK_2
     time_t temp_gmt = time(NULL) + (gmtOffset*60);
   #else
     time_t temp_gmt = time(NULL);
